@@ -1,0 +1,15 @@
+here is the deal with the deal
+
+request
+key=value
+body (request uausally has no body)
+
+response
+key=value
+body
+
+basic stuff:
+code(ls,down)
+status(1,0)
+data(true, false)
+lines(nums)

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<people>
+    <person>
+        <first>Ted</first>
+        <last>Mosby</last>
+    </person>
+    <person>
+        <first>Barney</first>
+        <last>Stinson</last>
+    </person>
+    <person>
+        <first>Robin</first>
+        <last>Bla</last>
+    </person>
+    <person>
+        <first>Lily</first>
+        <last>Blabla</last>
+    </person>
+</people>
