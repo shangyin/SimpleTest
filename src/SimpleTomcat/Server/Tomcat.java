@@ -1,5 +1,8 @@
 package SimpleTomcat.Server;
 
+import SimpleAOP.AOP;
+import SimpleAOP.AOPFactory;
+import SimpleAOP.ReflectUtilIns;
 import SimpleTomcat.DataConnection;
 import SimpleTomcat.Server.FileManager.FileManager;
 import SimpleTomcat.Server.ServletInstance.*;
@@ -49,6 +52,7 @@ public class Tomcat
     class Handler implements Runnable
     {
         private Socket client;
+        private AOP aop;
 
         public Handler(Socket client)
         {
@@ -57,6 +61,7 @@ public class Tomcat
 
         public void run()
         {
+
             try
             {
                 //生成Request和Response
@@ -64,6 +69,12 @@ public class Tomcat
                         client.getInetAddress());
                 Response response = new Response(client.getOutputStream());
                 System.out.println("new request: \"" + request.getParameter(CODE) + "\"");
+
+                AOPFactory factory = new AOPFactory();
+
+                factory.addAfter(new ReflectUtilIns(client, "close"));
+                factory.addAfter(new ReflectUtilIns(Servlet.dataConnection, "release", client.getInetAddress()));
+
 
 
                 //寻找对应servlet，并启动
@@ -82,7 +93,7 @@ public class Tomcat
                 //关闭命令传输的socket
                 client.close();
                 //关闭数据传输的socket
-                Servlet.dataConnection.stop();
+                Servlet.dataConnection.release(client.getInetAddress());
             }
             catch (Exception e)
             {

@@ -64,7 +64,7 @@ public class Response
 
     public static void main(String[] args)
     {
-        Response r = new Response(null);
+        Response r = new Response(System.out);
         r.addPara("hello", "too");
         r.addPara("goodbye", "toto");
         r.addPara("hey", "sub");
