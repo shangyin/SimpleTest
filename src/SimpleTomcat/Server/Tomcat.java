@@ -3,6 +3,7 @@ package SimpleTomcat.Server;
 import SimpleAOP.AOP;
 import SimpleAOP.AOPFactory;
 import SimpleAOP.ReflectUtilIns;
+import SimpleAOP.ReflectUtilStc;
 import SimpleTomcat.DataConnection;
 import SimpleTomcat.Server.FileManager.FileManager;
 import SimpleTomcat.Server.ServletInstance.*;
@@ -59,29 +60,35 @@ public class Tomcat
             this.client = client;
         }
 
+        private void generateAOP()
+        {
+            AOPFactory factory = new AOPFactory();
+            factory.addBefore(new ReflectUtilStc
+                    (() -> System.out.println("new request " + client)));
+            factory.addAfter(new ReflectUtilStc
+                    (() -> System.out.println("end request " + client)));
+            aop = factory.getAOP();
+        }
+
         public void run()
         {
+            generateAOP();
+            aop.aroundAdvice(new ReflectUtilStc(this::invokeServlet));
+        }
 
+        public void invokeServlet()
+        {
             try
             {
                 //生成Request和Response
                 Request request = new Request(client.getInputStream(),
                         client.getInetAddress());
                 Response response = new Response(client.getOutputStream());
-                System.out.println("new request: \"" + request.getParameter(CODE) + "\"");
-
-                AOPFactory factory = new AOPFactory();
-
-                factory.addAfter(new ReflectUtilIns(client, "close"));
-                factory.addAfter(new ReflectUtilIns(Servlet.dataConnection, "release", client.getInetAddress()));
-
-
 
                 //寻找对应servlet，并启动
                 Servlet servlet = Mapper.get(request.getParameter(CODE));
                 if (servlet != null)
                 {
-                    System.out.println("invoke " + request.getParameter(CODE));
                     servlet.service(request, response);
                 }
                 else
@@ -89,10 +96,7 @@ public class Tomcat
                     response.addPara(CODE, ANSWER_DENY);
                     response.flush();
                 }
-
-                //关闭命令传输的socket
                 client.close();
-                //关闭数据传输的socket
                 Servlet.dataConnection.release(client.getInetAddress());
             }
             catch (Exception e)
